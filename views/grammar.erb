@@ -1,0 +1,231 @@
+<script type="text/javascript" src="path-to-mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<br>
+<div class="grammar">
+
+  Recuerde que un PEG $G$ es una cuaterna $G =(\Sigma,V,P,S)$.
+
+  <ol>
+    <li>$\Sigma$ es el conjunto de terminales. 
+    <li>$V$ es un conjunto (disjunto de $\Sigma$) que se denomina conjunto de 
+        <i>símbolos no terminales</i>,
+        <i>variables sintácticas</i> o <i>categorías gramáticales</i>.
+    <li>$P$ es un conjunto de pares de $V \times (V \cup \Sigma )^*$. En vez de escribir
+    un par usando la notación $(A, \alpha) \in P$ se escribe $A \leftarrow \alpha$.<br>
+    Un elemento de $P$ se denomina <i>regla de análisis</i>. 
+    <li>Por último, $S$ es un símbolo del conjunto
+    $V$ que se denomina <i>expresión de arranque</i>.
+  </ol>
+
+  Concretando en la práctica, la gramática $G$ se tendría como:
+
+  <ol>
+    <li> <i>Conjunto de Terminales:</i>
+        <br>
+        $\Sigma = \{ =, +, -, *, /, (, ) \} \cup$ <br />
+        $\{ IF, WHILE, DO, BEGIN, END, CALL, CONST, VAR, PROCEDURE, ODD \} \cup$ <br />
+        $\{ ASSIGN, ADDMINUS, MULDIV, LPAREN, RPAREN, DOT, COMMA \} \cup$ <br />
+        $\{ SEMICOLON, COMPARISON, ID, NUMBER \} $
+    <li> Conjunto de <i>símbolos no terminales</i>, <i>variables sintácticas</i> o <i>categorías gramáticales</i>:<br>
+      $V = \{ program, block, const\_block, var\_block, proc\_block, assignment, assigment\_star, id \} \cup$ <br />
+      $\{ id\_star, argument, argument\_star, number, statement, statement\_plus, condition, condition\_ \} \cup$ <br />
+      $\{expression, term, factor \} $ <br />
+    <li> Productions:
+    <li> <i>Reglas de Análisis:</i>
+    <ol>
+      <pre>
+      program         : block DOT EOF
+                      ;
+
+      block           : const_block var_block proc_block statement
+                      ;
+
+      const_block     : CONST assignment assigment_star SEMICOLON
+                      | /*EMPTY*/
+                      ;
+
+      var_block       : VAR id id_star SEMICOLON
+                      | /*EMPTY*/
+                      ;
+
+      proc_block      : PROCEDURE id argument SEMICOLON block SEMICOLON proc_block
+                      | /*EMPTY*/
+                      ;
+
+      assignment      : id ASSIGN number
+                      ;
+
+      assigment_star  : COMMA assignment assigment_star
+                      | /*EMPTY*/
+                      ;
+
+      id              : ID
+                      | /*EMPTY*/
+                      ;
+
+      id_star         : COMMA id id_star
+                      ;
+
+      argument        : LPAREN id argument_star RPAREN
+                      | /*EMPTY*/
+                      ;
+
+      argument_star   : COMMA id argument_star
+                      | /*EMPTY*/
+                      ;
+
+      number          : NUMBER 
+                      ;                     
+
+      statement       : id ASSIGN expression
+                      | CALL id argument
+                      | BEGIN statement statement_plus END
+                      | IF condition THEN statement ELSE statement
+                      | IF condition THEN statement
+                      | WHILE condition DO statement
+
+      statement_plus  : SEMICOLON statement statement_plus
+                      | /*EMPTY*/
+                      ;
+
+      condition       : condition_
+                      ;
+
+      condition_      : ODD expression
+                      | expression COMPARISON expression
+                      ;
+
+      expression      : term 
+                      | term ADDMINUS expression
+                      ;
+
+      term            : factor
+                      | factor MULDIV term
+                      ;
+
+      factor          : number
+                      | id 
+                      | LPAREN expression RPAREN  
+                      ;
+      </pre>
+    </ol>
+    <li> <i>Expresión de arranque: </i> <br> $S = program$
+  </ol>
+
+  Aunque también se ha dejado la posibilidad se definir la gramática de manera que calcule las operaciones en las asignaciones. Si este fuera el caso, habría que realizar en calculator.jison y calculator.j; 1: descomentar lo comentado y 2. comentar lo que se señala. Luego, la gramática quedaría definida como: 
+
+  <ol>
+    <li> <i>Conjunto de Terminales:</i>
+        <br>
+        $\Sigma = \{ ; =, ID, PI, E, +, -, *, /, \text{^}, !, \%, (, ) \} \cup$ <br />
+        $\{ IF, WHILE, DO, BEGIN, END, CALL, CONST, VAR, PROCEDURE, ODD \} \cup$ <br />
+        $\{ ASSIGN, ADDMINUS, MULDIV, LPAREN, RPAREN, DOT, COMMA \} \cup$ <br />
+        $\{ SEMICOLON, COMPARISON, ID, NUMBER \} $ 
+    <li> Conjunto de <i>símbolos no terminales</i>, <i>variables sintácticas</i> o <i>categorías gramáticales</i>:
+      <br>
+      $V = \{ program, block, const\_block, var\_block, proc\_block, assignment, assigment\_star, id \} \cup$ <br />
+      $\{ id\_star, argument, argument\_star, number, statement, statement\_plus, condition, condition\_ \} \cup$ <br />
+      $\{expression, s, e \} $ <br />
+    <li> Productions:
+    <li> <i>Reglas de Análisis:</i>
+    <ol>
+      <pre>
+      program         : block DOT EOF
+                      ;
+
+      block           : const_block var_block proc_block statement
+                      ;
+
+      const_block     : CONST assignment assigment_star SEMICOLON
+                      | /*EMPTY*/
+                      ;
+
+      var_block       : VAR id id_star SEMICOLON
+                      | /*EMPTY*/
+                      ;
+
+      proc_block      : PROCEDURE id argument SEMICOLON block SEMICOLON proc_block
+                      | /*EMPTY*/
+                      ;
+
+      assignment      : id ASSIGN number
+                      ;
+
+      assigment_star  : COMMA assignment assigment_star
+                      | /*EMPTY*/
+                      ;
+
+      id              : ID
+                      | /*EMPTY*/
+                      ;
+
+      id_star         : COMMA id id_star
+                      ;
+
+      argument        : LPAREN id argument_star RPAREN
+                      | /*EMPTY*/
+                      ;
+
+      argument_star   : COMMA id argument_star
+                      | /*EMPTY*/
+                      ;
+
+      number          : NUMBER 
+                      ;                     
+
+      statement       : id ASSIGN expression
+                      | CALL id argument
+                      | BEGIN statement statement_plus END
+                      | IF condition THEN statement ELSE statement
+                      | IF condition THEN statement
+                      | WHILE condition DO statement
+
+      statement_plus  : SEMICOLON statement statement_plus
+                      | /*EMPTY*/
+                      ;
+
+      condition       : condition_
+                      ;
+
+      condition_      : ODD expression
+                      | expression COMPARISON expression
+                      ;
+
+      expression      : s  
+                      | expression ';' s
+                      ;
+
+      s               : /* empty */
+                      | e
+                      ;
+
+      e               : ID '=' e
+                      | e '+' e
+                      | e '-' e
+                      | e '*' e
+                      | e '/' e
+                      | e '^' e
+                      | e '!'
+                      | e '%'
+                      | '-' e 
+                      | '(' e ')'
+                      | NUMBER
+                      | E
+                      | PI
+                      | ID 
+                      ;
+      </pre>
+    </ol>
+    <li> <i>Expresión de arranque: </i> <br> $S = program$
+  </ol>
+</div>
+<br>
+<br>
+<br>
+

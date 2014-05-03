@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>PLenJison</title>
+    <link rel="stylesheet" href="css/styles.css" type="text/css" media="screen" charset="utf-8" />
+    <link href="lib/codemirror.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="lib/codemirror.js"></script>
+    <script src="lib/mode/pascal/pascal.js"></script>
+  </head>
+  <body>
+      <div id="flash"><%= flash[:welcome] if flash[:welcome]%></div>
+    <nav>
+      <ul>
+        <li> <a href="/grammar"  title="Grammar" <%=current?("/grammar")%>>Grammar</a> </li>
+        <li> <a href="/"  title="Home" <%=current?("/")%>>Home</a> </li>
+        <li> <a href="/tests"  title="Tests" <%=current?("/tests")%>>Tests</a> </li>
+        <li> <a href="/auth/google_oauth2"  title="Twitter" <%=current?("/auth/google_oauth2")%>>Google AUTH</a> </li>
+        <li> <a href="https://github.com/alu0100789683/JISON" target="_blank" title="Repo">Repo</a> </li>
+        <li> <a href="http://en.wikipedia.org/wiki/Recursive_descent_parser#Example_parser" target="_blank"  title="Wikipedia">PL0</a> </li>
+        <li> <a href="http://zaach.github.io/jison/" target="_blank" title="Jison">Jison</a> </li>
+      </ul>
+    </nav>
+    <section>
+      <%= yield %>
+    </section>
+    <script src="js/jquery.stickytableheaders.js"></script>
+    <script type="text/javascript">$("table.ini").stickyTableHeaders();</script>
+    <footer>
+      <script>
+        var myCodeMirror = CodeMirror.fromTextArea(document.getElementById("input"), {
+          lineNumbers: true,
+          viewportMargin: Infinity
+        });
+      </script>
+      <script type="text/javascript" src="js/calculator.js"></script>
+      <script type="text/javascript" src="js/main.js"></script>
+    </footer>
+  </body>
+</html>

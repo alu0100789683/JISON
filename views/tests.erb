@@ -1,0 +1,75 @@
+	<link rel="stylesheet" href="../css/mocha.css" />
+	<div id="mocha"></div>
+
+	<script src="tests/chai.js"></script>
+	<script src="tests/mocha.js"></script>
+		
+	<script>mocha.setup('tdd')</script>
+	<script src="tests/tests.js"></script>
+		
+	<script>
+		mocha.run();
+	</script>
+
+	<table class="loadfile">
+      <tr>
+        <td class="save">Select a file already stored:</td>
+        <td>Or write your own code:</td>
+      </tr>
+      <tr>
+        <td>
+          <nav>
+            <ul>
+
+            </ul>
+          </nav>  
+          <p>
+            Or load an existing file:
+          </p>
+          <input type="file" id="examples" />
+        </td>
+        <td>
+          <form action="/save" method="post">
+            <textarea id="input" name="input" autofocus rows = "7">
+
+            </textarea>
+            <br/>
+            <label for="saveas">Save the code as:</label>
+            <input id="saveas" type="text" name="fname" 
+                   title="Un identificador (que no sea la palabra 'test')"
+                   pattern="^(?!test$)\w+$"/>
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <td><button class="mylink" id="parse" type="button">parse</button></td>
+        <td></td>
+      </tr>
+    </table>
+  </p>
+
+
+  <p>
+
+  </p>
+
+  <div class="hidden" id="out">
+    <table class="ini">
+      <thead>
+        <tr>
+          <th>Tokens</th>
+        </tr>
+      </thead>
+      <tbody class="scrollContent">
+        <tr>
+          <td>
+            <div class="output"><!-- Output goes here! --> 
+              <pre>
+<span id="output"></span>
+              </pre>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>

@@ -1,0 +1,514 @@
+/* Código de soporte */
+
+%{
+    var symbols = {};
+    var ambito = "";
+    function assignExpression(id,valor){
+        //comprobamos en las globales
+        //if(symbols['init'].hasOwnProperty(id)){
+            //symbols['init'][id]['value'] = valor
+        //}else{
+            //throw("Solo simbolos globales");
+        //}
+    }
+    function buildBlock(constant, vd, procedure, cont) {
+        var result = {
+        type: 'BLOCK',
+        symbol_table: {},
+        procs: procedure,
+        content: cont
+        };
+
+        // Agregamos las constantes a la tabla de símbolos
+        for (var i in constant) {
+            result.symbol_table[constant[i].id] = {
+            type: constant[i].type,
+            value: constant[i].value,
+            located: 'global'
+            };
+        }
+
+        // Agregamos las variables a la tabla de símbolos
+        for (var i in vd) {
+            result.symbol_table[vd[i].id] = {
+            type: vd[i].type,
+            id:vd[i].id,
+            value: null,
+            located: 'global'
+            };
+        }
+
+        // Agregamos los datos básicos de los procedimientos a la tabla de símbolos
+        for (var i in procedure) {
+            result.symbol_table[procedure[i].id] = {
+            type: procedure[i].type,
+            argument: procedure[i].argumenos? procedure[i].argumenos.length : 0,
+            located: 'global'
+            };
+        }
+        symbols['init'] = result.symbol_table;
+        return result;
+    }
+
+    function buildProcedure (id, argumenos, block) {
+        result = {
+        type: 'PROCEDURE',
+        id: id.value,
+        argumenos: argumenos,
+        symbol_table: block.symbol_table,
+        procs: block.procs,
+        content: block.content
+        };
+
+        // Agregamos los argumentos como VAR a la tabla de símbolos del procedimiento
+        for (var i in argumenos) {
+            result.symbol_table[argumenos[i].id] = {
+            type: 'VAR',
+            located: id.value
+            }
+        }
+
+        // Actualizamos los located de los IDs declarados en el bloque
+        // por el nombre del procedimiento
+        for (var i in result.symbol_table) {
+            if (result.symbol_table.hasOwnProperty(i))
+                result.symbol_table[i].located = id.value;
+        }
+        symbols[id.value] = result.symbol_table;
+        return result;
+    }
+
+    function CheckInit (node, symbol_table) {
+        if (!node) return;
+
+        if (node.type == 'ID') {
+            if (symbol_table.hasOwnProperty(node.value))
+                node.located = symbol_table[node.value].located;
+            else
+                throw("Identifier \"" + node.value + "\" has not been declared");
+        }else{
+            var n_symbol_table = {};
+            for (var i in symbol_table)
+                if (symbol_table.hasOwnProperty(i))
+                    n_symbol_table[i] = symbol_table[i];
+
+            if (node.symbol_table) {
+                for (var i in node.symbol_table) {
+                    if (node.symbol_table.hasOwnProperty(i))
+                        n_symbol_table[i] = node.symbol_table[i];
+                }
+            }
+
+            switch (node.type) {
+                case '=':
+                case '+':
+                case '*':
+                case '/':
+                case '<':
+                case '<=':
+                case '==':
+                case '!=':
+                case '>=':
+                case '>':
+                    CheckInit(node.left, n_symbol_table);
+                    CheckInit(node.right, n_symbol_table);
+                    break;
+                case '-':
+                    // Separamos el caso de que sea - unario o binario
+                    if (node.left) {
+                        CheckInit(node.left, n_symbol_table);
+                        CheckInit(node.right, n_symbol_table);
+                    }else{
+                        CheckInit(node.value, n_symbol_table);
+                    }
+                    break;
+                case 'ODD':
+                    CheckInit(node.exp, n_symbol_table);
+                    break;
+                case 'ARGEXP':
+                    CheckInit(node.content, n_symbol_table);
+                    break;
+                case 'PROC_CALL':
+                    CheckInit(node.id, n_symbol_table);
+                    if (node.arguments)
+                        for (var i in node.arguments)
+                            CheckInit(node.arguments[i], n_symbol_table);
+                    break;
+                case 'IF':
+                case 'IFELSE':
+                case 'WHILE':
+                    if (node.st)
+                        for (var i in node.st)
+                            CheckInit(node.st[i], n_symbol_table);
+                    if (node.sf)
+                        for (var i in node.sf)
+                            CheckInit(node.sf[i], n_symbol_table);
+                    CheckInit(node.cond, n_symbol_table);
+                    break;
+                case 'BLOCK':
+                case 'PROCEDURE':
+                    if (node.procs)
+                        for (var i in node.procs)
+                            CheckInit(node.procs[i], n_symbol_table);
+                    if (node.content) {
+                        if (node.content.length)
+                            for (var i in node.content)
+                                CheckInit(node.content[i], n_symbol_table);
+                        else
+                            CheckInit(node.content, n_symbol_table);
+                    }
+                    break;
+            }
+            if (node.type == 'PROC_CALL') {
+                if (symbol_table[node.id.value].type != 'PROCEDURE')
+                    throw("Cannot make a call to \"" + node.id.value + "\". It's not a procedure.");
+                if (symbol_table[node.id.value].argument != (node.arguments? node.arguments.length : 0))
+                    throw("Invalid number of arguments in the call to \"" + node.id.value + "\".");
+            }
+            if (node.type == '=') {
+                if (symbol_table[node.left.value].type == 'CONST VAR')
+                    throw("You cannot assign to the constant \"" + node.left.value + "\".");
+                if (symbol_table[node.left.value].type == 'PROCEDURE')
+                    throw("You cannot assign to the procedure \"" + node.left.value + "\".");
+            }
+        }
+    }
+
+    %}
+
+
+%right ASSIGN
+%left '+' '-'
+%left '*' '/'
+%left UMINUS
+
+%right THEN ELSE
+
+%token END_SYMBOL EOF CONST END_SENTENCE COMMA ID ASSIGN PROCEDURE BEGIN CALL COMPARISON_OP DO END
+%token IF LEFTPAR RIGHTPAR NUMBER ODD VAR WHILE
+
+%start program
+%%
+
+program
+: block END_SYMBOL EOF
+{
+    CheckInit($1, $1.symbol_table);
+    console.log($$);
+    return $1;
+}
+;
+
+block
+: const_decls var_decls proc_decls statement
+{
+    $$ = buildBlock($1, $2, $3, $4);
+}
+| var_decls proc_decls statement
+{
+    $$ = buildBlock(null, $1, $2, $3);
+}
+| const_decls proc_decls statement
+{
+    $$ = buildBlock($1, null, $2, $3);
+}
+| proc_decls statement
+{
+    $$ = buildBlock(null, null, $1, $2);
+}
+;
+
+proc_decls
+: /* nada */
+| proc_decl proc_decls
+{
+    $$ = [$1];
+    if ($2 && $2.length > 0)
+        $$ = $$.concat($2);
+}
+;
+
+const_decls
+: CONST const_decl comma_const_decls END_SENTENCE
+{
+    $$ = [$2];
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+comma_const_decls
+: /* nada */
+| COMMA const_decl comma_const_decls
+{
+    $$ = [$2];
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+const_decl
+: id ASSIGN number
+{
+    $$ = {
+    type: 'CONST VAR',
+    id: $1.value,
+    value: $3.value
+    };
+}
+;
+
+var_decls
+: VAR id comma_var_decls END_SENTENCE
+{
+    $$ = [{
+          type: 'VAR',
+          id: $2.value
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+comma_var_decls
+: /* nada */
+| COMMA id comma_var_decls
+{
+    $$ = [{
+          type: 'VAR',
+          id: $2.value
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+proc_decl
+: PROCEDURE id arglist END_SENTENCE block END_SENTENCE
+{
+    $$ = buildProcedure($2, $3, $5);
+}
+| PROCEDURE id END_SENTENCE block END_SENTENCE
+{
+    $$ = buildProcedure($2, null, $4);
+}
+;
+
+arglist
+: LEFTPAR id comma_arglist RIGHTPAR
+{
+    $$ = [{
+          type: 'ARG',
+          id: $2.value
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+comma_arglist
+: /* nada */
+| COMMA id comma_arglist
+{
+    $$ = [{
+          type: 'ARG',
+          id: $2.value
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+argexplist
+: LEFTPAR expression comma_argexplist RIGHTPAR
+{
+    $$ = [{
+          type: 'ARGEXP',
+          content: $2
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+comma_argexplist
+: /* nada */
+| COMMA expression comma_argexplist
+{
+    $$ = [{
+          type: 'ARGEXP',
+          content: $2
+          }];
+
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+statement
+: /* nada */
+| CALL id argexplist
+{
+    $$ = {
+    type: 'PROC_CALL',
+    id: $2,
+    arguments: $3
+    };
+}
+| CALL id
+{
+    $$ = {
+    type: 'PROC_CALL',
+    id: $2,
+    arguments: null
+    };
+}
+| BEGIN statement statement_list END
+{
+    $$ = [$2];
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+| IF LEFTPAR condition RIGHTPAR THEN statement ELSE statement
+{
+    $$ = {
+    type: 'IFELSE',
+    cond: $3,
+    st: $6,
+    sf: $8
+    };
+}
+| IF LEFTPAR condition RIGHTPAR THEN statement
+{
+    $$ = {
+    type: 'IF',
+    cond:  $3,
+    st: $6
+    };
+}
+| WHILE LEFTPAR condition RIGHTPAR DO statement
+{
+    $$ = {
+    type: 'WHILE',
+    cond: $3,
+    st: $6
+    };
+}
+| id ASSIGN expression
+{
+    assignExpression($1.value,$3.value);
+    $$ = {
+    type: '=',
+    value: $3.value,
+    left: $1,
+    right: $3
+    };
+}
+;
+
+statement_list
+: /* nada */
+| END_SENTENCE statement statement_list
+{
+    $$ = [$2];
+    if ($3 && $3.length > 0)
+        $$ = $$.concat($3);
+}
+;
+
+condition
+: ODD expression
+{
+    $$ = {
+    type: 'ODD',
+    exp: $2
+    };
+}
+| expression COMPARISON_OP expression
+{
+    $$ = {
+    type: $2,
+    left: $1,
+    right: $3
+    };
+}
+;
+
+expression
+: expression '+' expression
+{
+    $$ = {
+    type: $2,
+    value: parseInt($1.value) + parseInt($3.value),
+    left: $1,
+    right: $3
+    };
+}
+| expression '-' expression
+{
+    $$ = {
+    type: $2,
+    value: parseInt($1.value) - parseInt($3.value),
+    left: $1,
+    right: $3
+    };
+}
+| expression '*' expression
+{
+    $$ = {
+    type: $2,
+    value: parseInt($1.value) * parseInt($3.value),
+    left: $1,
+    right: $3
+    };
+}
+| expression '/' expression
+{
+    $$ = {
+    type: $2,
+    value: parseInt($1.value) / parseInt($3.value),
+    left: $1,
+    right: $3
+    };
+}
+| '-' expression %prec UMINUS
+{
+    $$ = {
+    type: $1,
+    value: $2
+    };
+}
+| number
+| id
+| LEFTPAR expression RIGHTPAR
+{
+    $$ = $2;
+}
+;
+
+id: ID
+{
+    $$ = {
+    type: 'ID',
+    value: yytext,
+    value_n:null,
+    located: null
+    };
+}
+;
+
+number: NUMBER
+{
+    $$ = {
+    type: 'NUMBER',
+    value: yytext
+    };
+}
+;
+
+%%

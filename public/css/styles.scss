@@ -1,0 +1,296 @@
+/* FUENTES */
+@font-face {
+  font-family: almendra;
+  src: url(../fonts/Almendra-Bold.otf) format('truetype');
+}
+@font-face {
+    font-family: pakenham;
+  src: url(../fonts/pakenham.ttf) format('truetype');
+}
+
+$red: #903;
+$black: #444;
+$white: #fff;
+$green: #00FF33;
+$blue: #002EB8;
+$brown: #E5B98A;
+$brown-medium: #7F674C;
+$brown-dark: #403326;
+$brown-light: #FFCD99;
+$main-font: Arial;
+$txtarea-font: Arial;
+$h-font: almendra;
+$width: 1110px;
+
+
+body {
+  font-family: $main-font;
+  background: #C9C9C9;/*#C29957;*/
+  background-image: url('../images/fondo1.jpg');
+  min-width: 450px;
+  max-width: $width;
+  margin: 0 auto;
+  color: $white;
+}
+
+h1, h2 {
+  color: $white;
+  font: 32px/1 $h-font;
+}
+
+header h2 {
+  font-size: 18px;
+  text-align: center;
+  color: black;
+  margin-top: -30px; 
+  padding-bottom: 10px;
+}
+
+header h1 {
+  font-size: 40px;
+  text-align: center;
+  color: black;
+}
+
+header img {
+  display:block;
+  margin:auto;
+  width: 10%;
+  height: 10%;
+  padding-top: 20px;
+  margin-bottom: -30px; 
+}
+
+@mixin tabs ($background: blue, $color: yellow, $hover: black) {
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: $background;
+    overflow: hidden;
+    border:none;
+    -moz-border-radius: 7px;
+    -webkit-border-radius: 7px;
+    border-radius: 7px;
+  }
+  li {
+    float: left;
+  }
+  a {
+    text-decoration: none;
+    display: block;
+    padding: 9px;
+    background: $background;
+    color: $color;
+    &:hover {
+      background: lighten($hover, 20%);
+      color: white;
+    }
+  }
+}
+
+nav {
+  @include tabs ($background: black, $color: white, $hover: $brown-dark);
+  font-weight: bold;
+}
+
+p {
+  font: 16px/1 $main-font;
+}
+
+label {
+  display: block;
+}
+
+nav a.current {
+  background: lighten($brown-dark, 30%);
+}
+   
+.error {
+  color: $white;
+  background-color: $red;
+}
+
+.centered {
+  text-align: center;
+}
+
+/* ESTILO DE LOS FLASH */
+
+.flash {
+  width: 600px;
+  padding: 5px;
+  font-weight: bold;
+  margin: 20px;
+  background: lighten($red, 60%);
+  color: $red;
+  border: 1px solid $red;
+}
+
+.success {
+  color: $green;
+  background-color: $black;
+}
+
+/* ESTILO DE LA SALIDA DE LOS DATOS */
+
+.hidden {
+  display: none;
+}
+
+.unhidden {
+  display: block;
+}
+
+div.unhidden {
+  overflow: auto;
+  width: 95%;
+}
+
+table {
+  border-collapse: separate;
+  margin: 0 auto 0 auto;
+  &.ini {
+    width: 750px;
+    th {
+      font-family: pakenham;
+      font-size: 20px;
+      text-align: center;
+      color: white;
+      border: 0px;
+      border-radius: 7px 7px 7px 7px;
+      background-color: $brown-dark;
+      padding: 2px 0px 6px 15px;
+      margin-top: 40px;
+      margin-bottom: 23px;
+    }
+    td {
+      font-family: $txtarea-font;
+      color: $black;
+      vertical-align: top;
+      text-align: left;
+      font-family: arial;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 10px;
+      line-height: 20px;
+      background-color: #ffffff;
+      -moz-border-radius: 7px;
+      -webkit-border-radius: 7px;
+      border-radius: 7px;
+      border: 2px solid #333029;
+    }
+  }
+}
+
+/* ESTILO PARA LA PRESENTACIÓN DE LA GRAMÁTICA */
+
+.grammar {
+  background-color: $brown-medium;
+  width: 1070;
+  border-radius: 7px;
+  color: $brown;
+  padding: 20px;
+}
+
+/* ESTILO DE LA TABLA loadfile */
+
+table.loadfile {
+  border-collapse: separate;
+  border-spacing: 35px 15px;
+  background-color: $brown-medium;
+  width: $width;
+  border-radius: 7px;
+  color: $brown;
+  td.file {
+    border-radius: 7px;
+    background-color: $brown;
+    width: 200px;
+  }
+  td.save {
+     width: 200px;
+  }
+}
+
+/* ESTILO DE LOS FICHEROS */
+
+ul.file {
+  list-style: none;
+  padding: 5;
+}
+
+.example {
+  width: 100px;
+  background-color: $brown-dark;
+  color: white;
+  padding: 3px 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ESTILO DEL TEXTAREA */
+
+#original {                /* http://www.css3maker.com/index.html */
+  margin-left: auto;
+  margin-right: auto;
+  width: 600px;
+  background-color: #FFFFFF;
+  padding: 15px 0px 24px 21px;
+  border: none;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  -moz-box-shadow: 10px 10px 5px #3e332f;
+  -webkit-box-shadow: 10px 10px 5px #3e332f;
+  box-shadow: 10px 10px 5px #3e332f;
+}
+
+/* QUITAR EL RECUADRO CUANDO TIENE EL FOCUS */
+
+:focus {
+  outline: 0px;
+}
+
+/* ESTILO DEL BOTÓN */
+
+.mylink {
+  width: 100px;
+  font-weight: bold;
+  -moz-box-shadow: inset 0px 1px 0px 0px #a6827e;
+  -webkit-box-shadow: inset 0px 1px 0px 0px #a6827e;
+  box-shadow: inset 0px 1px 0px 0px #a6827e;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #381f05), color-stop(1, #664b2e));
+  background: -moz-linear-gradient(top, #381f05 5%, #664b2e 100%);
+  background: -webkit-linear-gradient(top, #381f05 5%, #664b2e 100%);
+  background: -o-linear-gradient(top, #381f05 5%, #664b2e 100%);
+  background: -ms-linear-gradient(top, #381f05 5%, #664b2e 100%);
+  background: linear-gradient(to bottom, #381f05 5%, #664b2e 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#381f05', endColorstr='#664b2e',GradientType=0);
+  background-color: #381f05;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+  border: 1px solid #54381e;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-family: arial;
+  font-size: 15px;
+  padding: 8px 24px;
+  text-decoration: none;
+  text-shadow: 0px 1px 0px #4d3534;
+  &:hover {
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #664b2e), color-stop(1, #381f05));
+    background: -moz-linear-gradient(top, #664b2e 5%, #381f05 100%);
+    background: -webkit-linear-gradient(top, #664b2e 5%, #381f05 100%);
+    background: -o-linear-gradient(top, #664b2e 5%, #381f05 100%);
+    background: -ms-linear-gradient(top, #664b2e 5%, #381f05 100%);
+    background: linear-gradient(to bottom, #664b2e 5%, #381f05 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#664b2e', endColorstr='#381f05',GradientType=0);
+    background-color: #664b2e;
+  }
+  &:active {
+    position: relative;
+    top: 1px;
+  }
+}
